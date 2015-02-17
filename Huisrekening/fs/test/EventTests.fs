@@ -27,19 +27,31 @@ let Jolien = {name = "Jolien"
 
 let commands = [
     Create("huis", Date(2001,1,1))
-    Participate(Anita, Date(2002,4,1))
-    Participate(Jolien, Date(2015,5,1))
-    Participate(Mark, Date(2004,1,1))
+    Participate(Anita, Date(2002,4,1), standard)
+    Participate(Jolien, Date(2015,5,1), standard)
+    Participate(Mark, Date(2004,1,1), standard)
     ]
+
+let fundrunner = Aggregate.runner Fund.aggregate
+let perform = fundrunner.ExecAll Fund.zero
+
+let fund = perform commands
 
 [<TestFixture>]
 type ``Given an empty fund``() =
 
-    let fundrunner = CQRS.runner Fund.aggregate
+    let initTwice = commands @ [Create("huis", Date(2011,1,1))]
+    let participateTwice = commands @ [Participate(Mark, Date(2004,1,1),standard)]
+    let updateShare = commands @ [Participate(Mark, Date(2007,8,1), extraRoom)]
 
-    let fund = fundrunner.ExecAll Fund.zero commands
+    let contains (date:Date) = function
+        | {from=Some start ; upto=None}       -> start <= date
+        | {from=Some start ; upto=Some upto } -> start <= date &&  date < upto
+        | {from=None;        upto=Some upto } -> date < upto
+        | {from=None;        upto=None}       -> true
 
-    let commandsE = commands @ [Create("huis", Date(2011,1,1))]
+    let validAt date p = p.period |> contains date 
+    let per date ps = ps |> Seq.filter (validAt date)
 
     [<Test>] member test.
      ``adding three participants yields 3``() = 
@@ -47,8 +59,20 @@ type ``Given an empty fund``() =
 
     [<Test>] member test.
      ``initializing twice will throw an exception``()=
-         (fun () -> fundrunner.ExecAll Fund.zero commandsE |> ignore) 
+         (fun () -> perform initTwice |> ignore) 
          |> should throw typeof<System.Exception>
 
-     
-       
+    [<Test>] member test.
+     ``participating twice is allowed, and recorded``()=
+          (perform participateTwice).Participations.Length |> should equal 4
+
+(* //I am having problems with let expression in fsUnit tests
+    [<Test>] member test.
+     ``updates are recorded and change history``()=
+         let ps = (perform updateShare).Participations
+                  |> per (Date(2008,1,1))
+         ps.Length |> should equal 3
+*)   
+
+
+
