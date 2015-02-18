@@ -3,22 +3,16 @@
   <MonoDevelop.Ide.Workbench ActiveDocument="Huisrekening/fs/test/EventTests.fs">
     <Files>
       <File FileName="Huisrekening/Program.fs" Line="5" Column="5" />
-      <File FileName="../../../Projects/teachmeFS/teachmeFS/Tutorial.fs" Line="43" Column="43" />
-      <File FileName="Huisrekening/fs/main/Events.fs" Line="1" Column="1" NotebookId="1" />
-      <File FileName="Huisrekening/fs/main/History.fs" Line="1" Column="1" NotebookId="1" />
+      <File FileName="../../../Projects/teachmeFS/teachmeFS/Tutorial.fs" Line="1" Column="1" />
+      <File FileName="Huisrekening/fs/test/UnquoteTests.fs" Line="17" Column="17" />
+      <File FileName="Huisrekening/fs/main/Time.fs" Line="1" Column="1" />
+      <File FileName="Huisrekening/fs/main/Events.fs" Line="15" Column="15" NotebookId="1" />
       <File FileName="Huisrekening/SampleCommand.fsx" Line="1" Column="1" NotebookId="1" />
-      <File FileName="Huisrekening/fs/test/EventTests.fs" Line="38" Column="38" NotebookId="1" />
+      <File FileName="Huisrekening/fs/test/EventTests.fs" Line="2" Column="2" NotebookId="1" />
     </Files>
     <Pads>
       <Pad Id="MonoDevelop.NUnit.TestPad">
-        <State expanded="True">
-          <Node name="Huisrekening" expanded="True">
-            <Node name="coretest+Given a LightBulb that has had its state set to false" expanded="True" />
-            <Node name="coretest+Given a LightBulb that has had its state set to true" expanded="True">
-              <Node name="" selected="True" />
-            </Node>
-          </Node>
-        </State>
+        <State expanded="True" selected="True" />
       </Pad>
     </Pads>
   </MonoDevelop.Ide.Workbench>

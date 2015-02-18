@@ -9,6 +9,7 @@ open Time
 open Participant
 open Participation
 open Fund
+open History
 
 let Anita = {name= "Anita"
              birthday= Date(1964,10, 25)
@@ -38,34 +39,37 @@ let initTwice = commands @ [Create("huis", Date(2011,1,1))]
 let participateTwice = commands @ [Participate(Mark, Date(2004,1,1),standard)]
 let updateShare = commands @ [Participate(Mark, Date(2007,8,1), extraRoom)]
 
-let contains (date:Date) = function
-    | {from=Some start ; upto=None}       -> start <= date
-    | {from=Some start ; upto=Some upto } -> start <= date &&  date < upto
-    | {from=None;        upto=Some upto } -> date < upto
-    | {from=None;        upto=None}       -> true
-
-let validAt date p = p.period |> contains date 
-
-///Per ``name`` there is a single most up-to-date entry
-///History doesn't combine earlier entries, as it would for instance on a beer-tab
-///Hence a new participation is not an addendum
-let lastItems ps = ps 
-                   |> Seq.groupBy (fun p -> p.participant.name)
-                   |> Seq.map( fun g -> (snd g) |> Seq.maxBy (fun p -> p.period.from) )
-
-let per date ps = ps 
-                  |> List.filter (validAt date)
-                  |> lastItems 
-
 let belongingTo name = Seq.filter (fun p -> p.participant.name = name) 
+
+
+[<Test>] 
+let ``adding three participants to an emty fund yields 3``() = 
+     test <@ fund.Participations.Length = 3 @>
 
 
 [<Test>]
 let ``updates are recorded and change history``()=
     let ps = (perform (commands @ [Participate(Mark, Date(2007,8,1), extraRoom)])).Participations
              |> per (Date(2008,1,1))
-             |> lastItems 
              |> belongingTo "Mark" 
              |> List.ofSeq   
-    test <@ ps.Length = 1 @>  
+    ps.Length =? 1 
+
+
+[<Test>] 
+let ``adding three participants yields 3``() = 
+    fund.Participations.Length =? 3
+   
+
+[<Test>] 
+let ``initializing twice will throw an exception``()=
+    raises<System.Exception> <@ perform initTwice @> 
+
+[<Test>] 
+let ``participating twice is allowed, and recorded``()=
+    (perform participateTwice).Participations.Length =? 4
+
+
+
+
 
