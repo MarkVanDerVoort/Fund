@@ -58,6 +58,7 @@
     <Compile Include="fs\main\Events.fs" />
     <Compile Include="fs\main\History.fs" />
     <Compile Include="fs\test\UnquoteTests.fs" />
+    <Compile Include="fs\test\TimelessShares.fs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.1\Framework\v4.0\Microsoft.FSharp.Targets" />
   <ItemGroup>

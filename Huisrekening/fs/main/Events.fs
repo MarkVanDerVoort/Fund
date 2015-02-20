@@ -8,24 +8,21 @@ module DeelnameTypes =
 
 module Participant = 
     open DeelnameTypes
-    open Time
 
-    type Participant = {
+    type Person = {
         name : string
-        birthday : Date
+        birthday : Time.Date
         accounts : Iban list }
 
 module Participation =
     open Participant
-    open Time
 
     type Share = {groot : int; klein : int}
     let standard = {groot=1; klein =0}
     let extraRoom = {groot=1; klein=1}
 
     type Participation = {
-            participant : Participant
-            period : Period 
+            persons : Person list
             share : Share}
 
 module Aggregate =
@@ -62,46 +59,58 @@ module Fund =
     type Fund = {
         Id: Id
         Name: string
-        Period: Period
+        Active: bool
         Participations : Participation list 
         }
 
     type FundCommand =
-        | Create of string * Date
-        | Close of Id * Date
-        | Participate of Participant * Date * Share
+        | Create of string
+        | Close of Id
+        | Participate of Person * Share
+        | Join of Person * Person
        
     type FundEvent = 
-        | Created of Id * string * Date
-        | Closed of Id * Date
-        | Participated of Participant * Date * Share
+        | Created of Id * string
+        | Closed of Id
+        | Participated of Person * Share
+        | Joined of Person list * Share
 
-    let zero = {Id = ""; Name=""; Period = emptyPeriod; Participations = []}
+    let zero = {Id = ""; Name=""; Participations = []; Active=false}
 
     let apply fund = function
-        | Created(id,name,date) -> {fund with Id=id
-                                              Name=name
-                                              Period={fund.Period with from=Some(date)}}
-        | Closed(id,date)       -> {fund with Period={fund.Period with upto=Some(date)}}
-        | Participated(p,d,s) -> {fund with Participations = {participant = p
-                                                              period = starting d
-                                                              share = s} :: fund.Participations} 
+        | Created(id,name) -> {fund with Id=id; Name=name; Active=true}
+        | Closed(id)  ->      {fund with Active=false}
+        | Participated(p,s) -> {fund with Participations = {persons = [p]; share = s} :: Participations} 
+        | Joined(ps,s) -> {fund with Participations = {persons = ps; share = s} :: Participations}
 
     let assertActive fund = if fund.Id = "" then failwith "fund is not active"
     let assertPristine fund = if fund.Id <> "" then failwith "fund is already initialized"
-    let assertNewParticipation fund participant period= 
-              if fund.Participations 
-                 |> Seq.exists (*ion -> amt*) (fun ion -> ion.participant = participant &&
-                                                          ion.period = period)
-              then failwith "participant is already part of this fund"                               
+    let assertNewParticipation fund participant = 
+        if fund.Participations 
+           |> Seq.exists (*ion -> amt*) (fun ion -> ion.participants |> Seq.exists participper then failwith "participant is already part of this fund"    
 
+    let belongingTo name = Seq.filter (fun p -> p.persons 
+                                                |> List.map (fun person -> person.name)
+                                                |> Seq.exists name )
+
+    let participation participant fund = 
+        fund.Participations 
+        |> List.filter (fun ion -> ion.participants |> Seq.exists participcipants)
+
+    let assertParticipation participant fund =  
+        if (participation participant fund) = [] 
+        then failwith "Participant doesn't take part in this fund" 
+         
     let exec fund = function
-        | Create(name,date) -> fund |> assertPristine
-                               Created("1",name, date)
-        | Close(id,date) -> assertActive fund;
-                            Closed(id,date)
-        | Participate(p, d, s) -> assertActive fund //check for previous participation
-                                  Participated(p,d,s)
+        | Create(name) -> fund |> assertPristine
+                          Created("1",name)
+        | Close(id) -> assertActive fund;
+                       Closed(id)
+        | Participate(p, s) -> assertActive fund //check for previous participation
+                               Participated(p,s)
+        | Join(a,b) -> fund |> assertParticipation a
+                       let participation = participation a fund |> List.head
+                       Joined(a,b,s participation)
     
     
 
@@ -112,7 +121,5 @@ module Fund =
           Exec = exec }  
     
 
-    type ParticipationEvent =
-        Join of Id * Participation       
-
+  
 

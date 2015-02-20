@@ -28,4 +28,6 @@ let contains (date:Date) = function
     | {from=None;        upto=None}       -> true
 
 
-
+type When<'event> =
+    | At of Date * 'event
+    | Through of Period * 'event
